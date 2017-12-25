@@ -1,0 +1,978 @@
+<!DOCTYPE html>
+
+
+
+  
+
+
+<html class="theme-next pisces use-motion" lang="zh-Hans">
+<head>
+  <meta charset="UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
+<meta name="theme-color" content="#222">
+
+
+
+
+
+
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform" />
+<meta http-equiv="Cache-Control" content="no-siteapp" />
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+  <link href="/lib/fancybox/source/jquery.fancybox.css?v=2.1.5" rel="stylesheet" type="text/css" />
+
+
+
+
+
+
+
+<link href="/lib/font-awesome/css/font-awesome.min.css?v=4.6.2" rel="stylesheet" type="text/css" />
+
+<link href="/css/main.css?v=5.1.3" rel="stylesheet" type="text/css" />
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png?v=5.1.3">
+
+
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png?v=5.1.3">
+
+
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png?v=5.1.3">
+
+
+  <link rel="mask-icon" href="/images/logo.svg?v=5.1.3" color="#222">
+
+
+
+
+
+  <meta name="keywords" content="iOS,Objective-C,NSURLSession,HTTP," />
+
+
+
+
+
+
+
+
+
+
+<meta name="description" content="NSURLSession 以及相关的类，提供了丰富的 API 通过 HTTP 协议来获取网络上的内容。NSURLSession 不仅提供了大量的代理方法来实现授权，同时也支持当 app 在 iOS 处于挂起状态时继续进行网络下载活动。 在实际的使用中，app 可能会创建多个对话（ session ），每个对话又包含了多个网络下载任务（ data transfer tasks ）。 和其他的网络请求">
+<meta name="keywords" content="iOS,Objective-C,NSURLSession,HTTP">
+<meta property="og:type" content="article">
+<meta property="og:title" content="NSURLSession">
+<meta property="og:url" content="http://ihomway.cc/2015/04/03/NSURLSession/index.html">
+<meta property="og:site_name" content="蘑菇味海星">
+<meta property="og:description" content="NSURLSession 以及相关的类，提供了丰富的 API 通过 HTTP 协议来获取网络上的内容。NSURLSession 不仅提供了大量的代理方法来实现授权，同时也支持当 app 在 iOS 处于挂起状态时继续进行网络下载活动。 在实际的使用中，app 可能会创建多个对话（ session ），每个对话又包含了多个网络下载任务（ data transfer tasks ）。 和其他的网络请求">
+<meta property="og:locale" content="zh-Hans">
+<meta property="og:updated_time" content="2016-05-01T18:59:41.000Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="NSURLSession">
+<meta name="twitter:description" content="NSURLSession 以及相关的类，提供了丰富的 API 通过 HTTP 协议来获取网络上的内容。NSURLSession 不仅提供了大量的代理方法来实现授权，同时也支持当 app 在 iOS 处于挂起状态时继续进行网络下载活动。 在实际的使用中，app 可能会创建多个对话（ session ），每个对话又包含了多个网络下载任务（ data transfer tasks ）。 和其他的网络请求">
+
+
+
+<script type="text/javascript" id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Pisces',
+    version: '5.1.3',
+    sidebar: {"position":"right","display":"post","offset":12,"b2t":false,"scrollpercent":true,"onmobile":false},
+    fancybox: true,
+    tabs: true,
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},
+    duoshuo: {
+      userId: '0',
+      author: '博主'
+    },
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+
+  <link rel="canonical" href="http://ihomway.cc/2015/04/03/NSURLSession/"/>
+
+
+
+
+
+  <title>NSURLSession | 蘑菇味海星</title>
+  
+
+
+
+
+
+
+
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="zh-Hans">
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-right page-post-detail">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta ">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/"  class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">蘑菇味海星</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+      
+        <p class="site-subtitle"></p>
+      
+  </div>
+
+  <div class="site-nav-toggle">
+    <button>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+<nav class="site-nav">
+  
+
+  
+    <ul id="menu" class="menu">
+      
+        
+        <li class="menu-item menu-item-home">
+          <a href="/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-home"></i> <br />
+            
+            首页
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-tags">
+          <a href="/tags/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-tags"></i> <br />
+            
+            标签
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/archives/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-archive"></i> <br />
+            
+            归档
+          </a>
+        </li>
+      
+
+      
+    </ul>
+  
+
+  
+</nav>
+
+
+
+ </div>
+    </header>
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="http://ihomway.cc/2015/04/03/NSURLSession/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="Homway Chen">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/avatar.png">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="蘑菇味海星">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">NSURLSession</h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2015-04-03T13:50:22+08:00">
+                2015-04-03
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+            <span class="post-category" >
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">分类于</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/iOS/" itemprop="url" rel="index">
+                    <span itemprop="name">iOS</span>
+                  </a>
+                </span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+          
+
+          
+          
+             <span id="/2015/04/03/NSURLSession/" class="leancloud_visitors" data-flag-title="NSURLSession">
+               <span class="post-meta-divider">|</span>
+               <span class="post-meta-item-icon">
+                 <i class="fa fa-eye"></i>
+               </span>
+               
+                 <span class="post-meta-item-text">阅读次数&#58;</span>
+               
+                 <span class="leancloud-visitors-count"></span>
+             </span>
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <p><code>NSURLSession</code> 以及相关的类，提供了丰富的 API 通过 HTTP 协议来获取网络上的内容。<code>NSURLSession</code> 不仅提供了大量的代理方法来实现授权，同时也支持当 app 在 iOS 处于挂起状态时继续进行网络下载活动。</p>
+<p>在实际的使用中，app 可能会创建多个对话（ session ），每个对话又包含了多个网络下载任务（ data transfer tasks ）。</p>
+<p>和其他的网络请求 API 类似，<code>NSURLSession</code> 也是高度异步的。如果采用系统提供的代理（ system-provide delegate ），就必须实现一个事件完成处理代码块（ completion handler block ），用来对网络任务完成时对下载的数据进行处理（失败的时候会提供一个Error）。亦或者，可以为其提供一个自定义的代理对象，这样的话，任务对象会在从服务端接收到数据时，调用相关的代理方法（ 如果是整个文件的下载，则是在下载结束的时候调用 ）。（ 事件完成处理代码块相对于自定义代理对象有更高的优先级。如果在穿件任务的时候同时传入了事件完成处理代码块，那么相关的代理方法就不会被调用。）</p>
+<p>NSURLSession 还提供了状态和进度的属性。还支持任务的取消，重启（继续）或者挂起。在app退出时，支持任务取消，失败或者恢复。</p>
+<p>一个会话中的任务的具体执行取决于三个方面：</p>
+<ul>
+<li>session 的类型（由配置对象（ <code>NSURLSessionConfiguration</code> ）决定</li>
+<li>任务类型</li>
+<li>任务创建时，app 是否在前台运行</li>
+</ul>
+<h2 id="NSURLSession-概况"><a href="#NSURLSession-概况" class="headerlink" title="NSURLSession 概况"></a>NSURLSession 概况</h2><h3 id="会话类型-Types-of-Sessions"><a href="#会话类型-Types-of-Sessions" class="headerlink" title="会话类型 ( Types of Sessions )"></a>会话类型 ( Types of Sessions )</h3><ul>
+<li>默认类型（ Default ）：该类型的行为和其他基于 Foundation 的网络方法类似，可以将缓存可持久化的存储到磁盘，把授权信息存储到用户的钥匙串（ user’s keychain ）。</li>
+<li>临时类型（ Ephemeral ）：不会存储任何信息到本地磁盘。所有的缓存，授权等等都存储在RAM中，并和会话紧密关联。当会话失效是，相关数据也都会被从 RAM 清除。</li>
+<li>后台类型（ Background ）：何默认模式类似，除了该类型下是单独开辟了一个进程进行数据传输。</li>
+</ul>
+<h3 id="任务类型-Types-of-Tasks"><a href="#任务类型-Types-of-Tasks" class="headerlink" title="任务类型 ( Types of Tasks )"></a>任务类型 ( Types of Tasks )</h3><ul>
+<li>数据任务（ Data Task ）：使用 <code>NSData</code> 对象来发送和接受数据。数据任务一般都是一个短暂的，临时性的网络请求任务。数据任务会每次返回一部分接收到的数据（ 使用事件完成处理代码块则是一次性返回 ）。数据任务并不会把数据存储到文件中，所以不支持后台会话类型。</li>
+<li>下载任务（ Download Task ）：以文件的形式接收数据，并且支持后台会话类型。</li>
+<li>上传任务（ Upload Task ）：以文件的形式上传数据，并且支持后台会话类型。</li>
+</ul>
+<h3 id="创建和设置对话-Creating-amp-Configuring-a-Session"><a href="#创建和设置对话-Creating-amp-Configuring-a-Session" class="headerlink" title="创建和设置对话 ( Creating &amp; Configuring a Session )"></a>创建和设置对话 ( Creating &amp; Configuring a Session )</h3><p><code>NSURLSession</code> 提供了大量的配置选项</p>
+<ul>
+<li>私有化的缓存，cookie，授权认证存储空间，针对个别对话的协议。</li>
+<li>身份验证，跟指定的单个网络任务请求或者会话绑定。</li>
+<li>文件化的上传和下载，鼓励将文件内容分割。</li>
+<li>单主机的最大接入数限制。</li>
+<li>在资源在一个确定的时间无法完成下载时，触发超时操作。</li>
+<li>最大和最小的 TLS 版本支持。</li>
+<li>自定义代理（ proxy ）字典。</li>
+<li>操控 cookie 策略。</li>
+<li>操控 HTTP 管线（ pipeline ）行为。</li>
+</ul>
+<p>因为大部分的配置都在一个 <code>NSURLSessionConfiguration</code> 对象中进行，所以可以服用其中相同的部分。在什么一个 <code>NSURLSession</code> 实例的过程如下：</p>
+<ul>
+<li>创建一个定义了会话和会话中任务行为的 <code>NSURLSessionConfiguration</code> 对象；</li>
+<li>作为一个可选的选项，可以创建一个代理对象来处理接收到的网络数据或者其他相关的会话和任务的操作，如服务器授权，决定是否将资源加载请求转变成下载任务等等。如果不设置代理对象，<code>NSURLSession</code> 对象会使用系统内建提供的代理。这样就可以在需要的是否轻松的使用 <code>sendAsynchronousRequest:queue:completionHandler:</code> 进行下载。（ 如果 app 需要进行后台的网络传输请求，则必须声明自定义的代理对象。 ）</li>
+</ul>
+<p>可以复用会话的配置对象来创建新的会话，除了后台任务的配置对象，因为另个不同的后他会话不能拥有相同的标示符。</p>
+<p>在创建会话的时候，会话的配置对象是通过深拷贝（ deep copy ）获取的，所以可以在任何时候对配置对象进行修改，但修改只会对后续采用该配置对象的会话有效，对之前创建的对话不产生任何影响。</p>
+<h3 id="使用系统内建代理请求数据（-Fetching-Resources-Using-System-Provide-Delegates-）"><a href="#使用系统内建代理请求数据（-Fetching-Resources-Using-System-Provide-Delegates-）" class="headerlink" title="使用系统内建代理请求数据（ Fetching Resources Using System-Provide Delegates ）"></a>使用系统内建代理请求数据（ Fetching Resources Using System-Provide Delegates ）</h3><p>最简洁的使用 <code>NSURLSession</code> 的方式是使用 <code>sendAsynchronousRequest:queue:completionHandler:</code> ，使用该方法，只需要二外提供两块代码：</p>
+<ul>
+<li>创建一个 <code>NSURLSessionConfiguration</code> 对象，以及基于该对象的一个 <code>NSURLSession</code>。</li>
+<li>创建一个用来处理下载完成的数据的事件完成处理代码块。</li>
+</ul>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">NSURLSession *delegateFreeSession = [NSURLSession sessionWithConfiguration:defaultConfigObject</span><br><span class="line">                                                                      delegate:nil</span><br><span class="line">                                                                 delegateQueue:[NSOperationQueue mainQueue]];</span><br><span class="line"></span><br><span class="line">[[delegateFreeSession dataTaskWithURL:[NSURL URLWithString:@&quot;http://www.example.com/&quot;] completionHandler:^(NSData *data, NSURLResponse *response, NSError *error) &#123;</span><br><span class="line">    NSLog(@&quot;Got response %@ with error %@.\n&quot;, response, error);</span><br><span class="line">    NSLog(@&quot;DATA:\n%@\nEND DATA\n&quot;, data);</span><br><span class="line">&#125;] resume];</span><br></pre></td></tr></table></figure>
+<h3 id="使用自定义代理请求数据（-Fetching-Data-Using-a-Custom-Delegate-）"><a href="#使用自定义代理请求数据（-Fetching-Data-Using-a-Custom-Delegate-）" class="headerlink" title="使用自定义代理请求数据（ Fetching Data Using a Custom Delegate ）"></a>使用自定义代理请求数据（ Fetching Data Using a Custom Delegate ）</h3><p>如果使用自定义的代理对象，必须实现下列方法：</p>
+<ul>
+<li><code>URLSession:dataTask:didReceiveData:</code> 将请求获得数据分块返回</li>
+<li><code>URLSession:task:didCompleteWithError:</code> 通知数据接收完成</li>
+</ul>
+<h3 id="下载文件（-Downloading-Files-）"><a href="#下载文件（-Downloading-Files-）" class="headerlink" title="下载文件（ Downloading Files ）"></a>下载文件（ Downloading Files ）</h3><p>下载文件和接收数据很类似，需要实现下列方法：</p>
+<ul>
+<li><code>URLSession:downloadTask:didFinishDownloadingToURL:</code> 提供一个临时的下载文字。</li>
+<li><code>URLSession:downloadTask:didWriteData:totalBytesWritten:totalBytesExpectedToWrite:</code> 提供下载进程的状态信息。</li>
+<li><code>URLSession:downloadTask:didResumeAtOffset:expectedTotalBytes:</code> 回馈恢复之前下载的失败的任务成功。</li>
+<li><code>URLSession:task:didCompleteWithError:</code> 下载完成。</li>
+</ul>
+<p>如果下载任务是在一个后台会话中进行的，在 app 挂起时，下载仍然会继续。如果是在标准会话或者临时会话中，那么下载任务需要在程序再起启动时重新开始。</p>
+<p>如果在下载进行的时候，用户请求暂停下载，app 可以通过调用<code>cancelByProducingResumeData:</code> 来暂停。之后可以通过<code>downloadTaskWithResumeData:</code> 或者<code>downloadTaskWithResumeData:completionHandler:</code> 来创建一个新的下载任务来继续之前的下载。</p>
+<p>如果下载失败，<code>URLSession:task:didCompleteWithError:</code> 代理方法会被调用，并传入一个 <code>NSError</code> 对象。如果任务仍然可以继续（ resume ），<code>NSError</code> 对象的 <code>userInfo</code> 字典包含了一个对应于“NSURLSessionDownloadTaskResumeData” 的值。然后在适合的时机再通过<code>downloadTaskWithResumeData:</code> 或<code>downloadTaskWithResumeData:completionHandler:</code> 来重启下载。</p>
+<h3 id="上传主体内容（-Uploading-Body-Content-）"><a href="#上传主体内容（-Uploading-Body-Content-）" class="headerlink" title="上传主体内容（ Uploading Body Content ）"></a>上传主体内容（ Uploading Body Content ）</h3><p>app 可以再 <strong>POST</strong> 请求的时候通过如下三种方法提供主题内容：</p>
+<ul>
+<li>使用NSData，如果 app 已经将数据加载到了内存就没必要去销毁它。</li>
+<li>使用文件，若果要上传的数据在磁盘的某个文件中，或者对于 app 来讲，将数据写到文件内比较好。</li>
+<li>使用数据流，如果数据是通过网络获得或者从已经存在的 <code>NSURLConnection</code> 转换获得，那么提供请求作为数据流。</li>
+</ul>
+<p>不管采取哪种方式，如果有提供自定义的会话代理，代理需要实现<code>URLSession:task:didSendBodyData:totalBytesSent:totalBytesExpectedToSend:</code> 来捕获上传的进度信息。</p>
+<p>另外，如果通过数据流来提供请求的主体，则必须声明自定义的会话代理。并且实现<code>URLSession:task:needNewBodyStream:</code> 方法。</p>
+<h4 id="通过NSData上传主体内容（-Uploading-Body-Content-Using-an-NSData-Object-）"><a href="#通过NSData上传主体内容（-Uploading-Body-Content-Using-an-NSData-Object-）" class="headerlink" title="通过NSData上传主体内容（ Uploading Body Content Using an NSData Object ）"></a>通过NSData上传主体内容（ Uploading Body Content Using an NSData Object ）</h4><p>如果使用 <code>NSData</code> 来上传主体内容，应该使用<code>uploadTaskWithRequest:fromData:</code> 或者<code>uploadTaskWithRequest:fromData:completionHandler:</code> ，通过 <code>fromData</code> 参数来添加数据。</p>
+<p>会话对象通过计算NSData来确定 <code>Content-Lenght</code> 。app 必须额外在请求对象中添加服务端需要的头部信息。</p>
+<h4 id="通过文件上传主体内容（Uploading-Body-Content-Using-a-File）"><a href="#通过文件上传主体内容（Uploading-Body-Content-Using-a-File）" class="headerlink" title="通过文件上传主体内容（Uploading Body Content Using a File）"></a>通过文件上传主体内容（Uploading Body Content Using a File）</h4><p>如果使用文件来上传主体内容，应该使用 <code>uploadTaskWithRequest:fromFile:</code> 或者 <code>uploadTaskWithRequest:fromFile:completionHandler:</code> ，提供文件的 <code>URL</code> 来添加数据。</p>
+<p>会话对象通过计算 <code>NSData</code> 来确定 <code>Content-Lenght</code> 。app 必须额外在请求对象中添加服务端需要的头部信息。</p>
+<h4 id="通过数据流上传主体内容（-Uploading-Body-Content-Using-a-Stream-）"><a href="#通过数据流上传主体内容（-Uploading-Body-Content-Using-a-Stream-）" class="headerlink" title="通过数据流上传主体内容（ Uploading Body Content Using a Stream ）"></a>通过数据流上传主体内容（ Uploading Body Content Using a Stream ）</h4><p>如果使用数据流来上传主体内容，应该使用 <code>uploadTaskWithStreamedRequest:</code> ，提供请求对象来获取与之相关联的数据流。</p>
+<p>app 必须额外在请求对象中添加服务端需要的头部信息。</p>
+<p>因为会话对象不一定能够从请求重读数据，对于必须重新尝试请求的情况，app 必须提供新的数据流。为此，app 应该实现 <code>URLSession:task:needNewBodyStream:</code> 方法。app 应该在这个方法中获取或者创建一个新的主体数据流，然后通过调用事件完成处理代码块来传入新的数据流。（ 因为 app 必须实现 ｀URLSession:task:needNewBodyStream:｀ 代理方法，因为会通过数据流来提供主体，这个方法和系统内建代理会产生冲突。）</p>
+<h4 id="通过下载任务上传主体内容（-Uploading-a-File-Using-a-Download-Task-）"><a href="#通过下载任务上传主体内容（-Uploading-a-File-Using-a-Download-Task-）" class="headerlink" title="通过下载任务上传主体内容（ Uploading a File Using a Download Task ）"></a>通过下载任务上传主体内容（ Uploading a File Using a Download Task ）</h4><p>如果要通过下载任务来实现主体内容上传，app 必须在创建下载请求的时候，提供  <code>NSData</code> 对象或者主体数据流作为 <code>NSURLRequest</code> 对象的内容。</p>
+<p>如果提供的数据使用数据流，app必须实现URLSession:task:needNewBodyStream:代理方法，用于在授权失败的时候提供一个新的主体数据流。</p>
+<h2 id="处理身份验证和自定义TLS（-Transport-Layer-Security-）链验证（-Handling-Authentication-and-Custom-TLS-Chain-Validation-）"><a href="#处理身份验证和自定义TLS（-Transport-Layer-Security-）链验证（-Handling-Authentication-and-Custom-TLS-Chain-Validation-）" class="headerlink" title="处理身份验证和自定义TLS（ Transport Layer Security ）链验证（ Handling Authentication and Custom TLS Chain Validation ）"></a>处理身份验证和自定义TLS（ Transport Layer Security ）链验证（ Handling Authentication and Custom TLS Chain Validation ）</h2><p>如果远程服务器返回的状态码表明需要进行认证，而这个认证有事链接层级别的话（例如 SSL 客户端证书），<code>NSURLSession</code> 会调用一个授权认证代理方法。（ Kerberos身份验证是透明地处理 ）</p>
+<ul>
+<li><p>对于会话层级别的授权请求 – <code>NSURLAuthenticationMethodNTLM</code> ，<code>NSURLAuthenticationMethodNegotiate</code> ，<code>NSURLAuthenticationMethodClientCertificate</code> 或者  <code>NSURLAuthenticationMethodServerTrust</code> – <code>NSULRSession</code> 对象会调用会话代理的 <code>URLSession:didReceiveChallenge:completionHandler:</code> 方法。如果 app 没有实现该会话代理方法，那么会代用任务代理的 <code>URLSession:task:didReceiveChallenge:completionHandler:</code> 方法来处理授权。</p>
+</li>
+<li><p>对于非会话层级别的请求 <code>NSURLSession</code> 对象调用会话代理的<code>URLSession:task:didReceiveChallenge:completionHandler:</code> 方法来处理，如果提供了会话的代理同时也需要去处理授权认证，那么必须在任务级别也处理授权或者在任务中明确的调用每个会话来处理。会话代理方法 <code>URLSession:didReceiveChallenge:completionHandler:</code> 不会在非会话层级别的授权请求中被调用。</p>
+</li>
+</ul>
+<p>当对于一个基于数据流上传主体的任务认证失败的时候，任务不能安全的倒回并且重使用之前的数据流。<code>NSRLSession</code> 对象会调用代理的 <code>URLSession:task:needNewBodyStream:</code> 方法来获取一个能够为请求提供新的主体数据的新的 <code>NSInputStream</code> 对象。（ 如果主体数据是基于 <code>NSData</code> 或者文件的， 该调用不会进行 ）。</p>
+<h2 id="处理iOS后台活动机制（Handling-iOS-Background-Activity）"><a href="#处理iOS后台活动机制（Handling-iOS-Background-Activity）" class="headerlink" title="处理iOS后台活动机制（Handling iOS Background Activity）"></a>处理iOS后台活动机制（Handling iOS Background Activity）</h2><p>如果在 iOS 的 app 中使用了 <code>NSURLSession</code> ，app 会在下载任务完成时重新启动。此时，app 的<code>application:handleEventsForBackgroundURLSession:completionHandler:app</code> 代理方法会得到响应，并重现创建一个相关的会话，存储完成处理句柄，以及在会话调用会话代理的 <code>URLSessionDidFinishEventsForBackgroundURLSession:</code> 方法时调用句柄。</p>
+
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/tags/iOS/" rel="tag"># iOS</a>
+          
+            <a href="/tags/Objective-C/" rel="tag"># Objective-C</a>
+          
+            <a href="/tags/NSURLSession/" rel="tag"># NSURLSession</a>
+          
+            <a href="/tags/HTTP/" rel="tag"># HTTP</a>
+          
+        </div>
+      
+
+      
+      
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/2015/03/25/My-First-Blog/" rel="next" title="My First Blog">
+                <i class="fa fa-chevron-left"></i> My First Blog
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+              <a href="/2015/04/09/app跳转/" rel="prev" title="App 跳转">
+                App 跳转 <i class="fa fa-chevron-right"></i>
+              </a>
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+
+    <div class="post-spread">
+      
+    </div>
+  </div>
+
+
+          </div>
+          
+
+
+          
+
+  
+
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
+            文章目录
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview-wrap">
+            站点概览
+          </li>
+        </ul>
+      
+
+      <section class="site-overview-wrap sidebar-panel">
+        <div class="site-overview">
+          <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+            
+              <img class="site-author-image" itemprop="image"
+                src="/images/avatar.png"
+                alt="Homway Chen" />
+            
+              <p class="site-author-name" itemprop="name">Homway Chen</p>
+              <p class="site-description motion-element" itemprop="description">Wubba Lubba Dub Dub</p>
+          </div>
+
+          <nav class="site-state motion-element">
+
+            
+              <div class="site-state-item site-state-posts">
+              
+                <a href="/archives/">
+              
+                  <span class="site-state-item-count">13</span>
+                  <span class="site-state-item-name">日志</span>
+                </a>
+              </div>
+            
+
+            
+              
+              
+              <div class="site-state-item site-state-categories">
+                <a href="/categories/index.html">
+                  <span class="site-state-item-count">6</span>
+                  <span class="site-state-item-name">分类</span>
+                </a>
+              </div>
+            
+
+            
+              
+              
+              <div class="site-state-item site-state-tags">
+                <a href="/tags/index.html">
+                  <span class="site-state-item-count">12</span>
+                  <span class="site-state-item-name">标签</span>
+                </a>
+              </div>
+            
+
+          </nav>
+
+          
+
+          <div class="links-of-author motion-element">
+            
+              
+                <span class="links-of-author-item">
+                  <a href="https://github.com/ihomway" target="_blank" title="GitHub">
+                    
+                      <i class="fa fa-fw fa-github"></i>GitHub</a>
+                </span>
+              
+                <span class="links-of-author-item">
+                  <a href="mailto:ihomway@live.com" target="_blank" title="E-Mail">
+                    
+                      <i class="fa fa-fw fa-envelope"></i>E-Mail</a>
+                </span>
+              
+                <span class="links-of-author-item">
+                  <a href="https://twitter.com/ihomway" target="_blank" title="Twitter">
+                    
+                      <i class="fa fa-fw fa-twitter"></i>Twitter</a>
+                </span>
+              
+                <span class="links-of-author-item">
+                  <a href="https://www.facebook.com/ihomway" target="_blank" title="Facebook">
+                    
+                      <i class="fa fa-fw fa-facebook"></i>Facebook</a>
+                </span>
+              
+                <span class="links-of-author-item">
+                  <a href="https://youtube.com/ihomway" target="_blank" title="YouTube">
+                    
+                      <i class="fa fa-fw fa-youtube"></i>YouTube</a>
+                </span>
+              
+                <span class="links-of-author-item">
+                  <a href="https://weibo.com/ihomway" target="_blank" title="Weibo">
+                    
+                      <i class="fa fa-fw fa-weibo"></i>Weibo</a>
+                </span>
+              
+            
+          </div>
+
+          
+          
+
+          
+          
+
+          
+
+        </div>
+      </section>
+
+      
+      <!--noindex-->
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#NSURLSession-概况"><span class="nav-number">1.</span> <span class="nav-text">NSURLSession 概况</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#会话类型-Types-of-Sessions"><span class="nav-number">1.1.</span> <span class="nav-text">会话类型 ( Types of Sessions )</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#任务类型-Types-of-Tasks"><span class="nav-number">1.2.</span> <span class="nav-text">任务类型 ( Types of Tasks )</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#创建和设置对话-Creating-amp-Configuring-a-Session"><span class="nav-number">1.3.</span> <span class="nav-text">创建和设置对话 ( Creating &amp; Configuring a Session )</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#使用系统内建代理请求数据（-Fetching-Resources-Using-System-Provide-Delegates-）"><span class="nav-number">1.4.</span> <span class="nav-text">使用系统内建代理请求数据（ Fetching Resources Using System-Provide Delegates ）</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#使用自定义代理请求数据（-Fetching-Data-Using-a-Custom-Delegate-）"><span class="nav-number">1.5.</span> <span class="nav-text">使用自定义代理请求数据（ Fetching Data Using a Custom Delegate ）</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#下载文件（-Downloading-Files-）"><span class="nav-number">1.6.</span> <span class="nav-text">下载文件（ Downloading Files ）</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#上传主体内容（-Uploading-Body-Content-）"><span class="nav-number">1.7.</span> <span class="nav-text">上传主体内容（ Uploading Body Content ）</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#通过NSData上传主体内容（-Uploading-Body-Content-Using-an-NSData-Object-）"><span class="nav-number">1.7.1.</span> <span class="nav-text">通过NSData上传主体内容（ Uploading Body Content Using an NSData Object ）</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#通过文件上传主体内容（Uploading-Body-Content-Using-a-File）"><span class="nav-number">1.7.2.</span> <span class="nav-text">通过文件上传主体内容（Uploading Body Content Using a File）</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#通过数据流上传主体内容（-Uploading-Body-Content-Using-a-Stream-）"><span class="nav-number">1.7.3.</span> <span class="nav-text">通过数据流上传主体内容（ Uploading Body Content Using a Stream ）</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#通过下载任务上传主体内容（-Uploading-a-File-Using-a-Download-Task-）"><span class="nav-number">1.7.4.</span> <span class="nav-text">通过下载任务上传主体内容（ Uploading a File Using a Download Task ）</span></a></li></ol></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#处理身份验证和自定义TLS（-Transport-Layer-Security-）链验证（-Handling-Authentication-and-Custom-TLS-Chain-Validation-）"><span class="nav-number">2.</span> <span class="nav-text">处理身份验证和自定义TLS（ Transport Layer Security ）链验证（ Handling Authentication and Custom TLS Chain Validation ）</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#处理iOS后台活动机制（Handling-iOS-Background-Activity）"><span class="nav-number">3.</span> <span class="nav-text">处理iOS后台活动机制（Handling iOS Background Activity）</span></a></li></ol></div>
+            
+
+          </div>
+        </section>
+      <!--/noindex-->
+      
+
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright">&copy; NULL &mdash; <span itemprop="copyrightYear">2017</span>
+  <span class="with-love">
+    <i class="fa fa-heartbeat"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">Homway</span>
+
+  
+</div>
+
+
+  <div class="powered-by">由 <a class="theme-link" target="_blank" href="https://hexo.io">Hexo</a> 强力驱动</div>
+
+
+
+  <span class="post-meta-divider">|</span>
+
+
+
+  <div class="theme-info">主题 &mdash; <a class="theme-link" target="_blank" href="https://github.com/iissnan/hexo-theme-next">NexT.Pisces</a> v5.1.3</div>
+
+
+
+
+        
+
+
+
+
+
+
+
+        
+      </div>
+    </footer>
+
+    
+      <div class="back-to-top">
+        <i class="fa fa-arrow-up"></i>
+        
+          <span id="scrollpercent"><span>0</span>%</span>
+        
+      </div>
+    
+
+    
+
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery/index.js?v=2.1.3"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/fastclick/lib/fastclick.min.js?v=1.0.6"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery_lazyload/jquery.lazyload.js?v=1.9.7"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/fancybox/source/jquery.fancybox.pack.js?v=2.1.5"></script>
+  
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/utils.js?v=5.1.3"></script>
+
+  <script type="text/javascript" src="/js/src/motion.js?v=5.1.3"></script>
+
+
+
+  
+  
+
+
+  <script type="text/javascript" src="/js/src/affix.js?v=5.1.3"></script>
+
+  <script type="text/javascript" src="/js/src/schemes/pisces.js?v=5.1.3"></script>
+
+
+
+  
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=5.1.3"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=5.1.3"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/bootstrap.js?v=5.1.3"></script>
+
+
+
+  
+
+
+  
+
+
+
+
+	
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+  
+  <script src="https://cdn1.lncld.net/static/js/av-core-mini-0.6.4.js"></script>
+  <script>AV.initialize("OstU3HPmKQuFwIe0wqN6SGHA-gzGzoHsz", "BvJDpS1SVjz3SveGROz2vLWR");</script>
+  <script>
+    function showTime(Counter) {
+      var query = new AV.Query(Counter);
+      var entries = [];
+      var $visitors = $(".leancloud_visitors");
+
+      $visitors.each(function () {
+        entries.push( $(this).attr("id").trim() );
+      });
+
+      query.containedIn('url', entries);
+      query.find()
+        .done(function (results) {
+          var COUNT_CONTAINER_REF = '.leancloud-visitors-count';
+
+          if (results.length === 0) {
+            $visitors.find(COUNT_CONTAINER_REF).text(0);
+            return;
+          }
+
+          for (var i = 0; i < results.length; i++) {
+            var item = results[i];
+            var url = item.get('url');
+            var time = item.get('time');
+            var element = document.getElementById(url);
+
+            $(element).find(COUNT_CONTAINER_REF).text(time);
+          }
+          for(var i = 0; i < entries.length; i++) {
+            var url = entries[i];
+            var element = document.getElementById(url);
+            var countSpan = $(element).find(COUNT_CONTAINER_REF);
+            if( countSpan.text() == '') {
+              countSpan.text(0);
+            }
+          }
+        })
+        .fail(function (object, error) {
+          console.log("Error: " + error.code + " " + error.message);
+        });
+    }
+
+    function addCount(Counter) {
+      var $visitors = $(".leancloud_visitors");
+      var url = $visitors.attr('id').trim();
+      var title = $visitors.attr('data-flag-title').trim();
+      var query = new AV.Query(Counter);
+
+      query.equalTo("url", url);
+      query.find({
+        success: function(results) {
+          if (results.length > 0) {
+            var counter = results[0];
+            counter.fetchWhenSave(true);
+            counter.increment("time");
+            counter.save(null, {
+              success: function(counter) {
+                var $element = $(document.getElementById(url));
+                $element.find('.leancloud-visitors-count').text(counter.get('time'));
+              },
+              error: function(counter, error) {
+                console.log('Failed to save Visitor num, with error message: ' + error.message);
+              }
+            });
+          } else {
+            var newcounter = new Counter();
+            /* Set ACL */
+            var acl = new AV.ACL();
+            acl.setPublicReadAccess(true);
+            acl.setPublicWriteAccess(true);
+            newcounter.setACL(acl);
+            /* End Set ACL */
+            newcounter.set("title", title);
+            newcounter.set("url", url);
+            newcounter.set("time", 1);
+            newcounter.save(null, {
+              success: function(newcounter) {
+                var $element = $(document.getElementById(url));
+                $element.find('.leancloud-visitors-count').text(newcounter.get('time'));
+              },
+              error: function(newcounter, error) {
+                console.log('Failed to create');
+              }
+            });
+          }
+        },
+        error: function(error) {
+          console.log('Error:' + error.code + " " + error.message);
+        }
+      });
+    }
+
+    $(function() {
+      var Counter = AV.Object.extend("Counter");
+      if ($('.leancloud_visitors').length == 1) {
+        addCount(Counter);
+      } else if ($('.post-title-link').length > 1) {
+        showTime(Counter);
+      }
+    });
+  </script>
+
+
+
+  
+
+  
+
+  
+  
+
+  
+
+  
+
+  
+
+</body>
+</html>

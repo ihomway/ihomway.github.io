@@ -1,0 +1,980 @@
+<!DOCTYPE html>
+
+
+
+  
+
+
+<html class="theme-next pisces use-motion" lang="zh-Hans">
+<head>
+  <meta charset="UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
+<meta name="theme-color" content="#222">
+
+
+
+
+
+
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform" />
+<meta http-equiv="Cache-Control" content="no-siteapp" />
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+  <link href="/lib/fancybox/source/jquery.fancybox.css?v=2.1.5" rel="stylesheet" type="text/css" />
+
+
+
+
+
+
+
+<link href="/lib/font-awesome/css/font-awesome.min.css?v=4.6.2" rel="stylesheet" type="text/css" />
+
+<link href="/css/main.css?v=5.1.3" rel="stylesheet" type="text/css" />
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png?v=5.1.3">
+
+
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png?v=5.1.3">
+
+
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png?v=5.1.3">
+
+
+  <link rel="mask-icon" href="/images/logo.svg?v=5.1.3" color="#222">
+
+
+
+
+
+  <meta name="keywords" content="YYCache," />
+
+
+
+
+
+
+
+
+
+
+<meta name="description" content="系列其他文章:  YYCache 源码学习（一）—— YYCache YYCache 源码学习（二）—— YYMemoryCache YYCache 源码学习（三）—— YYDiskCache   YYCache 是 ibireme 开发的一套高性能的缓存框架，是 YYKit 的组件之一。 ibireme 介绍 YYCache 有如下特性：  LRU：缓存支持 LRU（least-recentl">
+<meta name="keywords" content="YYCache">
+<meta property="og:type" content="article">
+<meta property="og:title" content="YYCache 源码学习（一）—— YYCache">
+<meta property="og:url" content="http://ihomway.cc/2017/03/05/YYCacheSourceCodeLearningOne/index.html">
+<meta property="og:site_name" content="蘑菇味海星">
+<meta property="og:description" content="系列其他文章:  YYCache 源码学习（一）—— YYCache YYCache 源码学习（二）—— YYMemoryCache YYCache 源码学习（三）—— YYDiskCache   YYCache 是 ibireme 开发的一套高性能的缓存框架，是 YYKit 的组件之一。 ibireme 介绍 YYCache 有如下特性：  LRU：缓存支持 LRU（least-recentl">
+<meta property="og:locale" content="zh-Hans">
+<meta property="og:updated_time" content="2017-03-05T14:18:19.000Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="YYCache 源码学习（一）—— YYCache">
+<meta name="twitter:description" content="系列其他文章:  YYCache 源码学习（一）—— YYCache YYCache 源码学习（二）—— YYMemoryCache YYCache 源码学习（三）—— YYDiskCache   YYCache 是 ibireme 开发的一套高性能的缓存框架，是 YYKit 的组件之一。 ibireme 介绍 YYCache 有如下特性：  LRU：缓存支持 LRU（least-recentl">
+
+
+
+<script type="text/javascript" id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Pisces',
+    version: '5.1.3',
+    sidebar: {"position":"right","display":"post","offset":12,"b2t":false,"scrollpercent":true,"onmobile":false},
+    fancybox: true,
+    tabs: true,
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},
+    duoshuo: {
+      userId: '0',
+      author: '博主'
+    },
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+
+  <link rel="canonical" href="http://ihomway.cc/2017/03/05/YYCacheSourceCodeLearningOne/"/>
+
+
+
+
+
+  <title>YYCache 源码学习（一）—— YYCache | 蘑菇味海星</title>
+  
+
+
+
+
+
+
+
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="zh-Hans">
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-right page-post-detail">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta ">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/"  class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">蘑菇味海星</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+      
+        <p class="site-subtitle"></p>
+      
+  </div>
+
+  <div class="site-nav-toggle">
+    <button>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+<nav class="site-nav">
+  
+
+  
+    <ul id="menu" class="menu">
+      
+        
+        <li class="menu-item menu-item-home">
+          <a href="/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-home"></i> <br />
+            
+            首页
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-tags">
+          <a href="/tags/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-tags"></i> <br />
+            
+            标签
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/archives/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-archive"></i> <br />
+            
+            归档
+          </a>
+        </li>
+      
+
+      
+    </ul>
+  
+
+  
+</nav>
+
+
+
+ </div>
+    </header>
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="http://ihomway.cc/2017/03/05/YYCacheSourceCodeLearningOne/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="Homway Chen">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/avatar.png">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="蘑菇味海星">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">YYCache 源码学习（一）—— YYCache</h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2017-03-05T22:10:09+08:00">
+                2017-03-05
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+            <span class="post-category" >
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">分类于</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/SourceCode/" itemprop="url" rel="index">
+                    <span itemprop="name">SourceCode</span>
+                  </a>
+                </span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+          
+
+          
+          
+             <span id="/2017/03/05/YYCacheSourceCodeLearningOne/" class="leancloud_visitors" data-flag-title="YYCache 源码学习（一）—— YYCache">
+               <span class="post-meta-divider">|</span>
+               <span class="post-meta-item-icon">
+                 <i class="fa fa-eye"></i>
+               </span>
+               
+                 <span class="post-meta-item-text">阅读次数&#58;</span>
+               
+                 <span class="leancloud-visitors-count"></span>
+             </span>
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <blockquote>
+<p>系列其他文章:</p>
+<ol>
+<li><a href="http://ihomway.cc/2017/03/05/YYCacheSourceCodeLearningOne/">YYCache 源码学习（一）—— YYCache</a></li>
+<li><a href="http://ihomway.cc/2017/03/05/YYCacheSourceCodeLearningTwo/">YYCache 源码学习（二）—— YYMemoryCache</a></li>
+<li>YYCache 源码学习（三）—— YYDiskCache</li>
+</ol>
+</blockquote>
+<p><a href="https://github.com/ibireme/YYCache" target="_blank" rel="noopener">YYCache</a> 是 <a href="http://blog.ibireme.com" target="_blank" rel="noopener">ibireme</a> 开发的一套高性能的缓存框架，是 <a href="https://github.com/ibireme/YYKit" target="_blank" rel="noopener">YYKit</a> 的组件之一。</p>
+<p>ibireme 介绍 YYCache 有如下特性：</p>
+<ul>
+<li><strong>LRU</strong>：缓存支持 LRU（least-recently-used）淘汰算法。</li>
+<li><strong>缓存控制</strong>：支持多种缓存控制方法：总数量、总大小、存活时间、空闲时间。</li>
+<li><strong>兼容性</strong>：API 基本和 <code>NSCache</code> 保持一致，所以方法都是线程安全的。</li>
+<li><strong>内存缓存</strong><ul>
+<li><strong>对象释放控制</strong>：对象的释放可以配置为同步或异步进行，可以配置在主线程或后台线程进行。</li>
+<li><strong>自动清空</strong>：当收到内存警告或 App 进入后台时，缓存可以配置为自动清空。</li>
+</ul>
+</li>
+<li><strong>磁盘缓存</strong><ul>
+<li><strong>可定制</strong>：磁盘缓存支持自定义的归档解档方法，以支持那些没有实现 <code>NSCoding</code> 协议的对象。</li>
+<li><strong>存储类型控制</strong>：磁盘缓存支持对每个对象的存储类型（SQLite/文件）进行自动或手动控制，以获得更高的存取性能。</li>
+</ul>
+</li>
+</ul>
+<p>YYCache 框架的文件结构如下：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">├── YYCache.h</span><br><span class="line">├── YYCache.m</span><br><span class="line">├── YYDiskCache.h</span><br><span class="line">├── YYDiskCache.m</span><br><span class="line">├── YYKVStorage.h</span><br><span class="line">├── YYKVStorage.m</span><br><span class="line">├── YYMemoryCache.h</span><br><span class="line">└── YYMemoryCache.m</span><br></pre></td></tr></table></figure>
+<p>通常一个缓存是由内存缓存和磁盘缓存组成，内存缓存提供容量小但高速的存取功能，磁盘缓存提供大容量但低速的持久化存储。</p>
+<h2 id="YYCache"><a href="#YYCache" class="headerlink" title="YYCache"></a>YYCache</h2><h3 id="初始化方法"><a href="#初始化方法" class="headerlink" title="初始化方法"></a>初始化方法</h3><p>YYCache 一共提供了四个初始化的方法：</p>
+<ol>
+<li><code>- (nullable instancetype)initWithPath:(NSString *)path NS_DESIGNATED_INITIALIZER;</code>；</li>
+<li><code>- (nullable instancetype)initWithName:(NSString *)name;</code>；</li>
+<li><code>+ (nullable instancetype)cacheWithName:(NSString *)name;</code>；</li>
+<li><code>+ (nullable instancetype)cacheWithPath:(NSString *)path;</code>。</li>
+</ol>
+<p>可以看到方法 <code>- initWithPath:</code> 被标记为 <code>NS_DESIGNATED_INITIALIZER</code>，所以另外三个初始化方法最终都会调用 <code>- initWithPath:</code> 来初始化。此外，<code>- init</code> 和 <code>+ new</code> 都被标记为 <code>UNAVAILABLE_ATTRIBUTE</code>，以防止使用者的错误使用。</p>
+<p><code>+ cacheWithName:</code> 和 <code>+ cacheWithPath:</code> 这两个类方法都是直接调用对应的实例方法 <code>- initWithName:</code> 和 <code>- initWithPath:</code>。</p>
+<p><code>- initWithName:</code> 则是通过传入的 <code>name</code> 来生产一个对应的文件路径，然后交由 <code>- initWithPath:</code> 来初始化。生产路径的代码如下：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">NSString *cacheFolder = [NSSearchPathForDirectoriesInDomains(NSCachesDirectory, NSUserDomainMask, YES) firstObject];</span><br><span class="line">NSString *path = [cacheFolder stringByAppendingPathComponent:name];</span><br></pre></td></tr></table></figure>
+<p>由代码可知，文件路径在 App 沙盒的 <code>Library/Caches</code> 下。可以说 <code>Library/Caches</code> 是 YYCache 默认使用的磁盘缓存存储路径，同时也是符合  对 iOS App 沙盒各文件夹的定义的：</p>
+<ul>
+<li><strong>Documents</strong>：这个目录用语存储用户数据。该路径可通过配置实现 iTunes 文件共享。可被 iTunes 备份。</li>
+<li><strong>Library</strong>：<ul>
+<li><strong>Preferences</strong>：保含 App 的偏好设置文件。不应该直接创建偏好配置文件，而是应该使用 NSUserDefaults 类来取得和设置 App 的偏好。</li>
+<li><strong>Caches</strong>：用于存放应用程序专用的支持文件，保存应用程序再次启动过程中需要的信息。可创建子文件夹。可以用来放置您希望被备份但不希望被用户看到的数据。该路径下的文件夹，除Caches以外，都会被iTunes备份。</li>
+</ul>
+</li>
+<li><strong>tmp</strong>：这个目录用于存放临时文件，保存应用程序再次启动过程中不需要的信息。该路径下的文件不会被iTunes备份。</li>
+</ul>
+<p>在 <code>- initWithPath:</code> 内对 YYCache 的属性进行创建和赋值。<code>YYDiskCache</code> 通过 <code>path</code> 进初始化，同时将 path 的最好一个路径作为 <code>YYMemoryCache</code> 和 <code>YYCache</code> 的名称。</p>
+<h3 id="根据-key-查询是否存在缓存"><a href="#根据-key-查询是否存在缓存" class="headerlink" title="根据 key 查询是否存在缓存"></a>根据 key 查询是否存在缓存</h3><ul>
+<li><code>- (BOOL)containsObjectForKey:(NSString *)key;</code></li>
+<li><code>- (void)containsObjectForKey:(NSString *)key withBlock:(nullable void(^)(NSString *key, BOOL contains))block;</code></li>
+</ul>
+<p>这两个方法都会在磁盘缓存和内存缓存中查询对应 key 的缓存是否存在，若存在返回 <code>YES</code>，否则返回 <code>NO</code>，会先查询内存缓冲，若内存缓存中没有对应的缓存，才会去查询磁盘缓存，也就是说，如果在内存缓存中查询到了，则不会执行磁盘缓存查询的操作。</p>
+<p>不同的是，<code>- containsObjectForKey:</code> 会在查询的时候阻塞调用的线程，如果在主线程中调用了该方法，很可能导致 UI 卡顿，而 <code>- containsObjectForKey: withBlock:</code> 则不会阻塞调用的线程。如果是在内存缓存中查询到对应的缓存，则会在 <code>DISPATCH_QUEUE_PRIORITY_DEFAULT</code> 的 <strong>global queue</strong> 中调用 block，若是在磁盘缓存中查询到对应的缓存，则是在 YYDisckCache 内部创建的并行队列中执行，无论在哪个缓存中查询到对应的缓存，如果需要执行 UI 相关的操作，都要切换到主线程再操作。 </p>
+<p>此外，在 <code>- containsObjectForKey: withBlock:</code> 如果传如的 block 参数为空，则该方法会立马返回，不会执行任何查询操作，避免了不必要的性能开销。</p>
+<h3 id="根据-key-读取缓存"><a href="#根据-key-读取缓存" class="headerlink" title="根据 key 读取缓存"></a>根据 key 读取缓存</h3><ul>
+<li><code>- (nullable id&lt;NSCoding&gt;)objectForKey:(NSString *)key;</code></li>
+<li><code>- (void)objectForKey:(NSString *)key withBlock:(nullable void(^)(NSString *key, id&lt;NSCoding&gt; object))block;</code></li>
+</ul>
+<p>与缓存的检测类似，缓存的读取也有两个方法，一个会阻塞调用的线程，一个通过 block 回调来避免线程阻塞。</p>
+<p>会先从内存缓存中读取对应的缓存，若内存缓存中不存在，则再去磁盘缓存中读取，如果磁盘缓存中有对应的缓存，不仅会被该缓存返回，还会将其写入到内存缓存中。</p>
+<p>在 <code>- objectForKey: withBlock:</code> 中，如果是在内存缓存中查询到对应的缓存，则会在 <code>DISPATCH_QUEUE_PRIORITY_DEFAULT</code> 的 <strong>global queue</strong> 中调用 block，若是在磁盘缓存中查询到对应的缓存，则是在 YYDisckCache 内部创建的并行队列中执行，无论在哪个缓存中查询到对应的缓存，如果需要执行 UI 相关的操作，都要切换到主线程再操作。</p>
+<p>此外，在 <code>- objectForKey: withBlock:</code> 如果传如的 block 参数为空，则该方法会立马返回，不会执行任何查询操作，避免了不必要的性能开销。</p>
+<h3 id="根据-key-设置缓存"><a href="#根据-key-设置缓存" class="headerlink" title="根据 key 设置缓存"></a>根据 key 设置缓存</h3><ul>
+<li><code>- (void)setObject:(nullable id&lt;NSCoding&gt;)object forKey:(NSString *)key;</code></li>
+<li><code>- (void)setObject:(nullable id&lt;NSCoding&gt;)object forKey:(NSString *)key withBlock:(nullable void(^)(void))block;</code></li>
+</ul>
+<p>方法 <code>- setObject: forKey:</code> 会在缓存写入完成后返回，所以可能阻塞线程；方法 <code>setObject: forKey: withBlock:</code> 则会立马返回，而在缓存写入完成后，调用 block（block 的调用和缓存的查询，读取类似），block 主要是在写入磁盘完成后被调用。</p>
+<h3 id="根据-key-移除缓存"><a href="#根据-key-移除缓存" class="headerlink" title="根据 key 移除缓存"></a>根据 key 移除缓存</h3><ul>
+<li><code>- (void)removeObjectForKey:(NSString *)key;</code></li>
+<li><code>- (void)removeObjectForKey:(NSString *)key withBlock:(nullable void(^)(NSString *key))block;</code></li>
+</ul>
+<p>方法 <code>- removeObjectForKey:</code> 会在缓存删除完成后返回，所以可能阻塞线程；方法 <code>removeObjectForKey: withBlock:</code> 则会立马返回，而在缓存删除完成后，调用 block（block 的调用和缓存的查询，读取类似），block 主要是在从磁盘删除完成后被调用。</p>
+<h3 id="移除所有缓存"><a href="#移除所有缓存" class="headerlink" title="移除所有缓存"></a>移除所有缓存</h3><ul>
+<li><code>- (void)removeAllObjects;</code></li>
+<li><code>- (void)removeAllObjectsWithBlock:(void(^)(void))block;</code></li>
+<li><code>- (void)removeAllObjectsWithProgressBlock:(nullable void(^)(int removedCount, int totalCount))progress endBlock:(nullable void(^)(BOOL error))end;</code></li>
+</ul>
+<p>方法 <code>- removeAllObjects</code> 会在缓存全部删除完成后返回，所以可能阻塞线程；方法 <code>- removeAllObjectsWithBlock:</code> 则会立马返回，而在缓存全部删除完成后，调用 block（block 的调用和缓存的查询，读取类似），block 主要是在从磁盘缓存全部删除完成后被调用。方法 <code>- removeAllObjectsWithProgressBlock: endBlock:</code> 除了提供全部缓存删除完成是的回调以外，还提供了缓存进度的提高，方便了 UI 上的进度条显示等实现，调用 block（block 的调用和缓存的查询，读取类似）。            </p>
+<blockquote>
+<p>相对与内存缓存而已，对磁盘的缓存往往比较耗时，耗能，所以 YYDisckCache 提高了不阻塞线程的各个方法，也因为如此，所以很多回调，进度等都是以磁盘缓存的操作为基准，将内存缓存的操作耗时忽略。在读取，查询的时候，也都是先对内存缓存进行操作，以缩短相应的时间，节省性能开销。                           </p>
+</blockquote>
+<h2 id="相关链接"><a href="#相关链接" class="headerlink" title="相关链接"></a>相关链接</h2><ul>
+<li><a href="https://github.com/ibireme/YYCache" target="_blank" rel="noopener">YYCache 源码</a></li>
+<li><a href="http://blog.ibireme.com" target="_blank" rel="noopener">ibireme 的博客</a></li>
+<li><a href="http://blog.ibireme.com/2015/10/26/yycache/" target="_blank" rel="noopener">YYCache 设计思路</a></li>
+<li><a href="http://blog.ibireme.com/2016/01/16/spinlock_is_unsafe_in_ios/" target="_blank" rel="noopener">不再安全的 OSSpinLock</a></li>
+<li><a href="https://en.wikipedia.org/wiki/Cache_replacement_policies#LRU" target="_blank" rel="noopener">Cache replacement policies</a></li>
+<li><a href="https://developer.apple.com/reference/foundation/nscache" target="_blank" rel="noopener">NSCache</a></li>
+<li>TMMemoryCache</li>
+<li>PINMemoryCache</li>
+</ul>
+
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/tags/YYCache/" rel="tag"># YYCache</a>
+          
+        </div>
+      
+
+      
+      
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/2017/01/21/swiftBasics/" rel="next" title="Swift 学习札记（一） - 基础知识">
+                <i class="fa fa-chevron-left"></i> Swift 学习札记（一） - 基础知识
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+              <a href="/2017/03/05/YYCacheSourceCodeLearningTwo/" rel="prev" title="YYCache 源码学习（二）—— YYMemoryCache">
+                YYCache 源码学习（二）—— YYMemoryCache <i class="fa fa-chevron-right"></i>
+              </a>
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+
+    <div class="post-spread">
+      
+    </div>
+  </div>
+
+
+          </div>
+          
+
+
+          
+
+  
+
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
+            文章目录
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview-wrap">
+            站点概览
+          </li>
+        </ul>
+      
+
+      <section class="site-overview-wrap sidebar-panel">
+        <div class="site-overview">
+          <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+            
+              <img class="site-author-image" itemprop="image"
+                src="/images/avatar.png"
+                alt="Homway Chen" />
+            
+              <p class="site-author-name" itemprop="name">Homway Chen</p>
+              <p class="site-description motion-element" itemprop="description">Wubba Lubba Dub Dub</p>
+          </div>
+
+          <nav class="site-state motion-element">
+
+            
+              <div class="site-state-item site-state-posts">
+              
+                <a href="/archives/">
+              
+                  <span class="site-state-item-count">13</span>
+                  <span class="site-state-item-name">日志</span>
+                </a>
+              </div>
+            
+
+            
+              
+              
+              <div class="site-state-item site-state-categories">
+                <a href="/categories/index.html">
+                  <span class="site-state-item-count">6</span>
+                  <span class="site-state-item-name">分类</span>
+                </a>
+              </div>
+            
+
+            
+              
+              
+              <div class="site-state-item site-state-tags">
+                <a href="/tags/index.html">
+                  <span class="site-state-item-count">12</span>
+                  <span class="site-state-item-name">标签</span>
+                </a>
+              </div>
+            
+
+          </nav>
+
+          
+
+          <div class="links-of-author motion-element">
+            
+              
+                <span class="links-of-author-item">
+                  <a href="https://github.com/ihomway" target="_blank" title="GitHub">
+                    
+                      <i class="fa fa-fw fa-github"></i>GitHub</a>
+                </span>
+              
+                <span class="links-of-author-item">
+                  <a href="mailto:ihomway@live.com" target="_blank" title="E-Mail">
+                    
+                      <i class="fa fa-fw fa-envelope"></i>E-Mail</a>
+                </span>
+              
+                <span class="links-of-author-item">
+                  <a href="https://twitter.com/ihomway" target="_blank" title="Twitter">
+                    
+                      <i class="fa fa-fw fa-twitter"></i>Twitter</a>
+                </span>
+              
+                <span class="links-of-author-item">
+                  <a href="https://www.facebook.com/ihomway" target="_blank" title="Facebook">
+                    
+                      <i class="fa fa-fw fa-facebook"></i>Facebook</a>
+                </span>
+              
+                <span class="links-of-author-item">
+                  <a href="https://youtube.com/ihomway" target="_blank" title="YouTube">
+                    
+                      <i class="fa fa-fw fa-youtube"></i>YouTube</a>
+                </span>
+              
+                <span class="links-of-author-item">
+                  <a href="https://weibo.com/ihomway" target="_blank" title="Weibo">
+                    
+                      <i class="fa fa-fw fa-weibo"></i>Weibo</a>
+                </span>
+              
+            
+          </div>
+
+          
+          
+
+          
+          
+
+          
+
+        </div>
+      </section>
+
+      
+      <!--noindex-->
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#YYCache"><span class="nav-number">1.</span> <span class="nav-text">YYCache</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#初始化方法"><span class="nav-number">1.1.</span> <span class="nav-text">初始化方法</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#根据-key-查询是否存在缓存"><span class="nav-number">1.2.</span> <span class="nav-text">根据 key 查询是否存在缓存</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#根据-key-读取缓存"><span class="nav-number">1.3.</span> <span class="nav-text">根据 key 读取缓存</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#根据-key-设置缓存"><span class="nav-number">1.4.</span> <span class="nav-text">根据 key 设置缓存</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#根据-key-移除缓存"><span class="nav-number">1.5.</span> <span class="nav-text">根据 key 移除缓存</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#移除所有缓存"><span class="nav-number">1.6.</span> <span class="nav-text">移除所有缓存</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#相关链接"><span class="nav-number">2.</span> <span class="nav-text">相关链接</span></a></li></ol></div>
+            
+
+          </div>
+        </section>
+      <!--/noindex-->
+      
+
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright">&copy; NULL &mdash; <span itemprop="copyrightYear">2017</span>
+  <span class="with-love">
+    <i class="fa fa-heartbeat"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">Homway</span>
+
+  
+</div>
+
+
+  <div class="powered-by">由 <a class="theme-link" target="_blank" href="https://hexo.io">Hexo</a> 强力驱动</div>
+
+
+
+  <span class="post-meta-divider">|</span>
+
+
+
+  <div class="theme-info">主题 &mdash; <a class="theme-link" target="_blank" href="https://github.com/iissnan/hexo-theme-next">NexT.Pisces</a> v5.1.3</div>
+
+
+
+
+        
+
+
+
+
+
+
+
+        
+      </div>
+    </footer>
+
+    
+      <div class="back-to-top">
+        <i class="fa fa-arrow-up"></i>
+        
+          <span id="scrollpercent"><span>0</span>%</span>
+        
+      </div>
+    
+
+    
+
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery/index.js?v=2.1.3"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/fastclick/lib/fastclick.min.js?v=1.0.6"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery_lazyload/jquery.lazyload.js?v=1.9.7"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/fancybox/source/jquery.fancybox.pack.js?v=2.1.5"></script>
+  
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/utils.js?v=5.1.3"></script>
+
+  <script type="text/javascript" src="/js/src/motion.js?v=5.1.3"></script>
+
+
+
+  
+  
+
+
+  <script type="text/javascript" src="/js/src/affix.js?v=5.1.3"></script>
+
+  <script type="text/javascript" src="/js/src/schemes/pisces.js?v=5.1.3"></script>
+
+
+
+  
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=5.1.3"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=5.1.3"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/bootstrap.js?v=5.1.3"></script>
+
+
+
+  
+
+
+  
+
+
+
+
+	
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+  
+  <script src="https://cdn1.lncld.net/static/js/av-core-mini-0.6.4.js"></script>
+  <script>AV.initialize("OstU3HPmKQuFwIe0wqN6SGHA-gzGzoHsz", "BvJDpS1SVjz3SveGROz2vLWR");</script>
+  <script>
+    function showTime(Counter) {
+      var query = new AV.Query(Counter);
+      var entries = [];
+      var $visitors = $(".leancloud_visitors");
+
+      $visitors.each(function () {
+        entries.push( $(this).attr("id").trim() );
+      });
+
+      query.containedIn('url', entries);
+      query.find()
+        .done(function (results) {
+          var COUNT_CONTAINER_REF = '.leancloud-visitors-count';
+
+          if (results.length === 0) {
+            $visitors.find(COUNT_CONTAINER_REF).text(0);
+            return;
+          }
+
+          for (var i = 0; i < results.length; i++) {
+            var item = results[i];
+            var url = item.get('url');
+            var time = item.get('time');
+            var element = document.getElementById(url);
+
+            $(element).find(COUNT_CONTAINER_REF).text(time);
+          }
+          for(var i = 0; i < entries.length; i++) {
+            var url = entries[i];
+            var element = document.getElementById(url);
+            var countSpan = $(element).find(COUNT_CONTAINER_REF);
+            if( countSpan.text() == '') {
+              countSpan.text(0);
+            }
+          }
+        })
+        .fail(function (object, error) {
+          console.log("Error: " + error.code + " " + error.message);
+        });
+    }
+
+    function addCount(Counter) {
+      var $visitors = $(".leancloud_visitors");
+      var url = $visitors.attr('id').trim();
+      var title = $visitors.attr('data-flag-title').trim();
+      var query = new AV.Query(Counter);
+
+      query.equalTo("url", url);
+      query.find({
+        success: function(results) {
+          if (results.length > 0) {
+            var counter = results[0];
+            counter.fetchWhenSave(true);
+            counter.increment("time");
+            counter.save(null, {
+              success: function(counter) {
+                var $element = $(document.getElementById(url));
+                $element.find('.leancloud-visitors-count').text(counter.get('time'));
+              },
+              error: function(counter, error) {
+                console.log('Failed to save Visitor num, with error message: ' + error.message);
+              }
+            });
+          } else {
+            var newcounter = new Counter();
+            /* Set ACL */
+            var acl = new AV.ACL();
+            acl.setPublicReadAccess(true);
+            acl.setPublicWriteAccess(true);
+            newcounter.setACL(acl);
+            /* End Set ACL */
+            newcounter.set("title", title);
+            newcounter.set("url", url);
+            newcounter.set("time", 1);
+            newcounter.save(null, {
+              success: function(newcounter) {
+                var $element = $(document.getElementById(url));
+                $element.find('.leancloud-visitors-count').text(newcounter.get('time'));
+              },
+              error: function(newcounter, error) {
+                console.log('Failed to create');
+              }
+            });
+          }
+        },
+        error: function(error) {
+          console.log('Error:' + error.code + " " + error.message);
+        }
+      });
+    }
+
+    $(function() {
+      var Counter = AV.Object.extend("Counter");
+      if ($('.leancloud_visitors').length == 1) {
+        addCount(Counter);
+      } else if ($('.post-title-link').length > 1) {
+        showTime(Counter);
+      }
+    });
+  </script>
+
+
+
+  
+
+  
+
+  
+  
+
+  
+
+  
+
+  
+
+</body>
+</html>

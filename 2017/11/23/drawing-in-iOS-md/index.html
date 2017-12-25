@@ -1,0 +1,914 @@
+<!DOCTYPE html>
+
+
+
+  
+
+
+<html class="theme-next pisces use-motion" lang="zh-Hans">
+<head>
+  <meta charset="UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
+<meta name="theme-color" content="#222">
+
+
+
+
+
+
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform" />
+<meta http-equiv="Cache-Control" content="no-siteapp" />
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+  <link href="/lib/fancybox/source/jquery.fancybox.css?v=2.1.5" rel="stylesheet" type="text/css" />
+
+
+
+
+
+
+
+<link href="/lib/font-awesome/css/font-awesome.min.css?v=4.6.2" rel="stylesheet" type="text/css" />
+
+<link href="/css/main.css?v=5.1.3" rel="stylesheet" type="text/css" />
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png?v=5.1.3">
+
+
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png?v=5.1.3">
+
+
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png?v=5.1.3">
+
+
+  <link rel="mask-icon" href="/images/logo.svg?v=5.1.3" color="#222">
+
+
+
+
+
+  <meta name="keywords" content="iOS,Core Graphics," />
+
+
+
+
+
+
+
+
+
+
+<meta name="description" content="在日常的 iOS 开发中，我们除了会直接使用由系统框架提供的 UI 组件以外，也会自定义各种不同的 UI 组件。有各种各样不同的方式来实现自定义的 UI 组件，其中使用系统的绘图 API 来绘制图形是比较常见的一种方式。  Graphics ContextsGraphics Contexts 可以理解为一块画布，所以绘图相关的操作都是在它上面进行的。 那么应该怎么创建或者获取 Graphics">
+<meta name="keywords" content="iOS,Core Graphics">
+<meta property="og:type" content="article">
+<meta property="og:title" content="简单入门 iOS 中的绘图 (一)">
+<meta property="og:url" content="http://ihomway.cc/2017/11/23/drawing-in-iOS-md/index.html">
+<meta property="og:site_name" content="蘑菇味海星">
+<meta property="og:description" content="在日常的 iOS 开发中，我们除了会直接使用由系统框架提供的 UI 组件以外，也会自定义各种不同的 UI 组件。有各种各样不同的方式来实现自定义的 UI 组件，其中使用系统的绘图 API 来绘制图形是比较常见的一种方式。  Graphics ContextsGraphics Contexts 可以理解为一块画布，所以绘图相关的操作都是在它上面进行的。 那么应该怎么创建或者获取 Graphics">
+<meta property="og:locale" content="zh-Hans">
+<meta property="og:image" content="http://blogimage.ihomway.cc/Untitled.png">
+<meta property="og:updated_time" content="2017-12-25T03:57:45.776Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="简单入门 iOS 中的绘图 (一)">
+<meta name="twitter:description" content="在日常的 iOS 开发中，我们除了会直接使用由系统框架提供的 UI 组件以外，也会自定义各种不同的 UI 组件。有各种各样不同的方式来实现自定义的 UI 组件，其中使用系统的绘图 API 来绘制图形是比较常见的一种方式。  Graphics ContextsGraphics Contexts 可以理解为一块画布，所以绘图相关的操作都是在它上面进行的。 那么应该怎么创建或者获取 Graphics">
+<meta name="twitter:image" content="http://blogimage.ihomway.cc/Untitled.png">
+
+
+
+<script type="text/javascript" id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Pisces',
+    version: '5.1.3',
+    sidebar: {"position":"right","display":"post","offset":12,"b2t":false,"scrollpercent":true,"onmobile":false},
+    fancybox: true,
+    tabs: true,
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},
+    duoshuo: {
+      userId: '0',
+      author: '博主'
+    },
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+
+  <link rel="canonical" href="http://ihomway.cc/2017/11/23/drawing-in-iOS-md/"/>
+
+
+
+
+
+  <title>简单入门 iOS 中的绘图 (一) | 蘑菇味海星</title>
+  
+
+
+
+
+
+
+
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="zh-Hans">
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-right page-post-detail">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta ">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/"  class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">蘑菇味海星</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+      
+        <p class="site-subtitle"></p>
+      
+  </div>
+
+  <div class="site-nav-toggle">
+    <button>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+<nav class="site-nav">
+  
+
+  
+    <ul id="menu" class="menu">
+      
+        
+        <li class="menu-item menu-item-home">
+          <a href="/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-home"></i> <br />
+            
+            首页
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-tags">
+          <a href="/tags/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-tags"></i> <br />
+            
+            标签
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/archives/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-archive"></i> <br />
+            
+            归档
+          </a>
+        </li>
+      
+
+      
+    </ul>
+  
+
+  
+</nav>
+
+
+
+ </div>
+    </header>
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="http://ihomway.cc/2017/11/23/drawing-in-iOS-md/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="Homway Chen">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/avatar.png">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="蘑菇味海星">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">简单入门 iOS 中的绘图 (一)</h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2017-11-23T11:54:28+08:00">
+                2017-11-23
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+            <span class="post-category" >
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">分类于</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/iOS/" itemprop="url" rel="index">
+                    <span itemprop="name">iOS</span>
+                  </a>
+                </span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+          
+
+          
+          
+             <span id="/2017/11/23/drawing-in-iOS-md/" class="leancloud_visitors" data-flag-title="简单入门 iOS 中的绘图 (一)">
+               <span class="post-meta-divider">|</span>
+               <span class="post-meta-item-icon">
+                 <i class="fa fa-eye"></i>
+               </span>
+               
+                 <span class="post-meta-item-text">阅读次数&#58;</span>
+               
+                 <span class="leancloud-visitors-count"></span>
+             </span>
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <blockquote>
+<p>在日常的 iOS 开发中，我们除了会直接使用由系统框架提供的 UI 组件以外，也会自定义各种不同的 UI 组件。有各种各样不同的方式来实现自定义的 UI 组件，其中使用系统的绘图 API 来绘制图形是比较常见的一种方式。</p>
+</blockquote>
+<h2 id="Graphics-Contexts"><a href="#Graphics-Contexts" class="headerlink" title="Graphics Contexts"></a>Graphics Contexts</h2><p><em>Graphics Contexts</em> 可以理解为一块画布，所以绘图相关的操作都是在它上面进行的。</p>
+<p>那么应该怎么创建或者获取 <em>Graphics Contexts</em> 呢？<em>Graphics Contexts</em> 的来源一般有两种：1) 通过系统获取，2) 自行创建。</p>
+<h3 id="获取-Graphics-Contexts"><a href="#获取-Graphics-Contexts" class="headerlink" title="获取 Graphics Contexts"></a>获取 <em>Graphics Contexts</em></h3><h4 id="通过系统获取-Graphics-Contexts"><a href="#通过系统获取-Graphics-Contexts" class="headerlink" title="通过系统获取 Graphics Contexts"></a>通过系统获取 <em>Graphics Contexts</em></h4><p>一般，在以下场景中，我们能够之间从系统获取 <em>Graphics Contexts</em>：</p>
+<ul>
+<li><code>drawRect:</code></li>
+<li><code>drawInContext:</code></li>
+<li><code>drawLayer:inContext:</code></li>
+</ul>
+<p>我们可以通过创建 <code>UIView</code> 的子类来重写 <code>drawRect:</code> 方法，在该方法中，我们已经处于一个 <em>Graphics Contexts</em> 中，之间在其上绘制就好。</p>
+<p><code>drawInContext:</code> 和 <code>drawLayer:inContext:</code> 都和 <code>CALayer</code> 有关，<code>drawInContext:</code> 是 <code>CALayer</code> 的一个实例方法，<code>drawLayer:inContext:</code> 是 <code>CALayer</code> 的代理方法（<code>UIView</code> 是嵌有一个 <code>CALayer</code> 的，也是该 <code>CALayer</code> 的代理）。我们可以通过创建 <code>CALayer</code> 的子类或者成为 <code>CALayer</code> 的代理来实现上述两个方法，然后完成绘制的操作。在这两个方法中，都有一个 <em>Graphics Contexts</em>，可以在其上绘制，与 <code>drawRect:</code> 不同的是，传入的 <em>Graphics Contexts</em> 并不是当前的 <em>Graphics Contexts</em>。（⚠️：在实践中发现，如果使用 <code>drawInContext:</code> 和 <code>drawLayer:inContext:</code> 来绘制，需要对 <code>CALayer</code> 调用 <code>setNeedsDisplay</code> 方法，否则绘制不会发生。）</p>
+<h4 id="创建-Graphics-Contexts"><a href="#创建-Graphics-Contexts" class="headerlink" title="创建 Graphics Contexts"></a>创建 <em>Graphics Contexts</em></h4><p>我们不会通过构造方法来创建 <em>Graphics Contexts</em>，日常中基本上只会在一个场景下创建 <em>Graphics Contexts</em>，那就是绘制生产图片的时候。 我们会使用 <code>UIGraphicsBeginImageContextWithOptions(_ size: CGSize, _ opaque: Bool, _ scale: CGFloat)</code> 函数来创建 <em>Graphics Contexts</em>，该函数不经创建了图片的 <em>Graphics Contexts</em>，还将其设置为了当前的 <em>Graphics Contexts</em>。</p>
+<h5 id="绘制一张图片"><a href="#绘制一张图片" class="headerlink" title="绘制一张图片"></a>绘制一张图片</h5><p>绘制一张图片所需的基本代码如下：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line">// 1. 创建图片绘制所需的 *Graphics Contexts*</span><br><span class="line">// 第一个参数表示画布的大小，同时也是生产的图片大学</span><br><span class="line">// 第二个参数表示图片是否是（包含）透明</span><br><span class="line">// 第三个表示图片的 scale 参数，如果为 0，则使用系统的 scale 参数</span><br><span class="line">UIGraphicsBeginImageContextWithOptions(imageSize, false, 0)</span><br><span class="line">// 2. 最画布上进行绘制</span><br><span class="line"></span><br><span class="line">// do some drawing</span><br><span class="line"></span><br><span class="line">// 3. 生成图片</span><br><span class="line">let img = UIGraphicsGetImageFromCurrentImageContext()</span><br><span class="line">// 4. 关闭创建的 *Graphics Contexts*</span><br><span class="line">UIGraphicsEndImageContext()</span><br><span class="line">// 5. 使用图片</span><br><span class="line">// use the image</span><br></pre></td></tr></table></figure>
+<h2 id="图形绘制-API"><a href="#图形绘制-API" class="headerlink" title="图形绘制 API"></a>图形绘制 API</h2><p>在 iOS 系统提供的绘图 API 中，有两套是我们经常用到的。一套包含在 <code>UIKit</code> 框架中，另一套包含在 <code>Core Graphics</code> 框架中（也就是 <code>Quartz</code> 或者 <code>Quartz 2D</code>）。</p>
+<h3 id="使用-UIKit-绘图"><a href="#使用-UIKit-绘图" class="headerlink" title="使用 UIKit 绘图"></a>使用 <code>UIKit</code> 绘图</h3><p>在使用 <code>UIKit</code> 绘图时，需要 <em>Graphics Contexts</em> 已经是当前的 <code>Contexts</code>。<br>对于 <code>UIKit</code> 中的 <code>UIImage</code>, <code>NSString</code>, <code>UIBezierPath</code> 和 <code>UIColor</code>，都只能绘制在当前的 <em>Graphics Contexts</em>，而不能进行额外指定。不过我们可以通过 <code>UIGraphicsPushContext</code> 函数将一个 <em>Graphics Contexts</em> 设置为当前的 <em>Context</em>。需要记住的是，在完成绘图操作后，需要调用 <code>UIGraphicsPopContext</code> 函数将之前的 <em>Graphics Contexts</em> 撤销为当前的 <em>Context</em>。可以使用 Swift 中的 <code>defer</code> 来避免遗忘该步操作。</p>
+<h3 id="使用-Core-Graphics-绘图"><a href="#使用-Core-Graphics-绘图" class="headerlink" title="使用 Core Graphics 绘图"></a>使用 <code>Core Graphics</code> 绘图</h3><p>使用 <code>Core Graphics</code> 绘图时，并不需要已经处于一个 <code>Graphics Contexts</code> 中。<code>Core Graphics</code> 绘图 API 是一个全功能的 API，<code>UIKit</code> 的绘制功能其实也是建立在其之上的，<code>Core Graphics</code> 是更低层的 API 接口，基本上都有 C 语言函数实现。</p>
+<h2 id="举个-🌰"><a href="#举个-🌰" class="headerlink" title="举个 🌰"></a>举个 🌰</h2><p>我们可以在三个地方（<code>UIView</code> 的 <code>drawRect:</code>， <code>CALayer</code> 相关的 <code>drawInContext:</code> 和 <code>drawLayer:inContext:</code>，图片绘制），使用两套 API 来绘图，所以一共产生了六种方式。</p>
+<p>接下来将使用两种方式来完成同一个任务：画一个有颜色的圆（为了方便区分使用不同的颜色）：</p>
+<h4 id="1-drawRect-amp-UIkit"><a href="#1-drawRect-amp-UIkit" class="headerlink" title="1. drawRect: &amp; UIkit"></a>1. <code>drawRect:</code> &amp; <code>UIkit</code></h4><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">override func draw(_ rect: CGRect) &#123;</span><br><span class="line">    let p = UIBezierPath(ovalIn: self.bounds.insetBy(dx: 4, dy: 4))</span><br><span class="line">    UIColor.blue.setFill()</span><br><span class="line">    p.fill()</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<h4 id="2-drawRect-amp-Core-Graphics"><a href="#2-drawRect-amp-Core-Graphics" class="headerlink" title="2. drawRect: &amp; Core Graphics"></a>2. <code>drawRect:</code> &amp; <code>Core Graphics</code></h4><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">override func draw(_ rect: CGRect) &#123;</span><br><span class="line">    let con = UIGraphicsGetCurrentContext()</span><br><span class="line">    con?.addEllipse(in: self.bounds.insetBy(dx: 4, dy: 4))</span><br><span class="line">    con?.setFillColor(UIColor.red.cgColor)</span><br><span class="line">    con?.fillPath()</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<h4 id="3-drawLayer-inContext-amp-UIKit"><a href="#3-drawLayer-inContext-amp-UIKit" class="headerlink" title="3. drawLayer:inContext: &amp; UIKit"></a>3. <code>drawLayer:inContext:</code> &amp; <code>UIKit</code></h4><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">override func draw(_ layer: CALayer, in ctx: CGContext) &#123;</span><br><span class="line">    UIGraphicsPushContext(ctx)</span><br><span class="line">    defer &#123; UIGraphicsPopContext() &#125;</span><br><span class="line">    </span><br><span class="line">    let p = UIBezierPath(ovalIn: self.bounds.insetBy(dx: 4, dy: 4))</span><br><span class="line">    UIColor.yellow.setFill()</span><br><span class="line">    p.fill()</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<h4 id="4-drawLayer-inContext-amp-CoreGraphics"><a href="#4-drawLayer-inContext-amp-CoreGraphics" class="headerlink" title="4. drawLayer:inContext: &amp; CoreGraphics"></a>4. <code>drawLayer:inContext:</code> &amp; CoreGraphics</h4><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line">override func draw(_ layer: CALayer, in ctx: CGContext) &#123;</span><br><span class="line">    ctx.saveGState()</span><br><span class="line">    defer &#123;</span><br><span class="line">        ctx.restoreGState()</span><br><span class="line">    &#125;</span><br><span class="line">    </span><br><span class="line">    ctx.addEllipse(in: self.bounds.insetBy(dx: 4, dy: 4))</span><br><span class="line">    ctx.setFillColor(UIColor.green.cgColor)</span><br><span class="line">    ctx.fillPath()</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<h4 id="5-图片绘制-amp-UIKit"><a href="#5-图片绘制-amp-UIKit" class="headerlink" title="5. 图片绘制 &amp; UIKit"></a>5. 图片绘制 &amp; <code>UIKit</code></h4><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line">let imageSize = CGSize(width: 200, height: 200)</span><br><span class="line">UIGraphicsBeginImageContextWithOptions(imageSize, false, 0)</span><br><span class="line">let p = UIBezierPath(ovalIn: CGRect(origin: .zero, size: imageSize).insetBy(dx: 4, dy: 4))</span><br><span class="line">UIColor.purple.setFill()</span><br><span class="line">p.fill()</span><br><span class="line">let img = UIGraphicsGetImageFromCurrentImageContext()</span><br><span class="line">    </span><br><span class="line">UIGraphicsEndImageContext()</span><br><span class="line">    </span><br><span class="line">return img</span><br></pre></td></tr></table></figure>
+<h4 id="6-图片绘制-amp-Core-Graphics"><a href="#6-图片绘制-amp-Core-Graphics" class="headerlink" title="6. 图片绘制 &amp; Core Graphics"></a>6. 图片绘制 &amp; <code>Core Graphics</code></h4><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line">let imageSize = CGSize(width: 200, height: 200)</span><br><span class="line">UIGraphicsBeginImageContextWithOptions(imageSize, false, 0)</span><br><span class="line">    </span><br><span class="line">let ctx = UIGraphicsGetCurrentContext()</span><br><span class="line">ctx?.addEllipse(in: CGRect(origin: .zero, size: imageSize).insetBy(dx: 4, dy: 4))</span><br><span class="line">ctx?.setFillColor(UIColor.cyan.cgColor)</span><br><span class="line">ctx?.fillPath()</span><br><span class="line">let img = UIGraphicsGetImageFromCurrentImageContext()</span><br><span class="line">    </span><br><span class="line">UIGraphicsEndImageContext()</span><br><span class="line">    </span><br><span class="line">return img</span><br></pre></td></tr></table></figure>
+<h4 id="绘制结果"><a href="#绘制结果" class="headerlink" title="绘制结果"></a>绘制结果</h4><p><img src="http://blogimage.ihomway.cc/Untitled.png" alt="Untitled-w598"></p>
+
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/tags/iOS/" rel="tag"># iOS</a>
+          
+            <a href="/tags/Core-Graphics/" rel="tag"># Core Graphics</a>
+          
+        </div>
+      
+
+      
+      
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/2017/07/28/ios-grapics-performance/" rel="next" title="如何改善图形性能">
+                <i class="fa fa-chevron-left"></i> 如何改善图形性能
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+
+    <div class="post-spread">
+      
+    </div>
+  </div>
+
+
+          </div>
+          
+
+
+          
+
+  
+
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
+            文章目录
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview-wrap">
+            站点概览
+          </li>
+        </ul>
+      
+
+      <section class="site-overview-wrap sidebar-panel">
+        <div class="site-overview">
+          <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+            
+              <img class="site-author-image" itemprop="image"
+                src="/images/avatar.png"
+                alt="Homway Chen" />
+            
+              <p class="site-author-name" itemprop="name">Homway Chen</p>
+              <p class="site-description motion-element" itemprop="description">Wubba Lubba Dub Dub</p>
+          </div>
+
+          <nav class="site-state motion-element">
+
+            
+              <div class="site-state-item site-state-posts">
+              
+                <a href="/archives/">
+              
+                  <span class="site-state-item-count">13</span>
+                  <span class="site-state-item-name">日志</span>
+                </a>
+              </div>
+            
+
+            
+              
+              
+              <div class="site-state-item site-state-categories">
+                <a href="/categories/index.html">
+                  <span class="site-state-item-count">6</span>
+                  <span class="site-state-item-name">分类</span>
+                </a>
+              </div>
+            
+
+            
+              
+              
+              <div class="site-state-item site-state-tags">
+                <a href="/tags/index.html">
+                  <span class="site-state-item-count">12</span>
+                  <span class="site-state-item-name">标签</span>
+                </a>
+              </div>
+            
+
+          </nav>
+
+          
+
+          <div class="links-of-author motion-element">
+            
+              
+                <span class="links-of-author-item">
+                  <a href="https://github.com/ihomway" target="_blank" title="GitHub">
+                    
+                      <i class="fa fa-fw fa-github"></i>GitHub</a>
+                </span>
+              
+                <span class="links-of-author-item">
+                  <a href="mailto:ihomway@live.com" target="_blank" title="E-Mail">
+                    
+                      <i class="fa fa-fw fa-envelope"></i>E-Mail</a>
+                </span>
+              
+                <span class="links-of-author-item">
+                  <a href="https://twitter.com/ihomway" target="_blank" title="Twitter">
+                    
+                      <i class="fa fa-fw fa-twitter"></i>Twitter</a>
+                </span>
+              
+                <span class="links-of-author-item">
+                  <a href="https://www.facebook.com/ihomway" target="_blank" title="Facebook">
+                    
+                      <i class="fa fa-fw fa-facebook"></i>Facebook</a>
+                </span>
+              
+                <span class="links-of-author-item">
+                  <a href="https://youtube.com/ihomway" target="_blank" title="YouTube">
+                    
+                      <i class="fa fa-fw fa-youtube"></i>YouTube</a>
+                </span>
+              
+                <span class="links-of-author-item">
+                  <a href="https://weibo.com/ihomway" target="_blank" title="Weibo">
+                    
+                      <i class="fa fa-fw fa-weibo"></i>Weibo</a>
+                </span>
+              
+            
+          </div>
+
+          
+          
+
+          
+          
+
+          
+
+        </div>
+      </section>
+
+      
+      <!--noindex-->
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#Graphics-Contexts"><span class="nav-number">1.</span> <span class="nav-text">Graphics Contexts</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#获取-Graphics-Contexts"><span class="nav-number">1.1.</span> <span class="nav-text">获取 Graphics Contexts</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#通过系统获取-Graphics-Contexts"><span class="nav-number">1.1.1.</span> <span class="nav-text">通过系统获取 Graphics Contexts</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#创建-Graphics-Contexts"><span class="nav-number">1.1.2.</span> <span class="nav-text">创建 Graphics Contexts</span></a><ol class="nav-child"><li class="nav-item nav-level-5"><a class="nav-link" href="#绘制一张图片"><span class="nav-number">1.1.2.1.</span> <span class="nav-text">绘制一张图片</span></a></li></ol></li></ol></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#图形绘制-API"><span class="nav-number">2.</span> <span class="nav-text">图形绘制 API</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#使用-UIKit-绘图"><span class="nav-number">2.1.</span> <span class="nav-text">使用 UIKit 绘图</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#使用-Core-Graphics-绘图"><span class="nav-number">2.2.</span> <span class="nav-text">使用 Core Graphics 绘图</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#举个-🌰"><span class="nav-number">3.</span> <span class="nav-text">举个 🌰</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#1-drawRect-amp-UIkit"><span class="nav-number">3.0.1.</span> <span class="nav-text">1. drawRect: &amp; UIkit</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#2-drawRect-amp-Core-Graphics"><span class="nav-number">3.0.2.</span> <span class="nav-text">2. drawRect: &amp; Core Graphics</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#3-drawLayer-inContext-amp-UIKit"><span class="nav-number">3.0.3.</span> <span class="nav-text">3. drawLayer:inContext: &amp; UIKit</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#4-drawLayer-inContext-amp-CoreGraphics"><span class="nav-number">3.0.4.</span> <span class="nav-text">4. drawLayer:inContext: &amp; CoreGraphics</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#5-图片绘制-amp-UIKit"><span class="nav-number">3.0.5.</span> <span class="nav-text">5. 图片绘制 &amp; UIKit</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#6-图片绘制-amp-Core-Graphics"><span class="nav-number">3.0.6.</span> <span class="nav-text">6. 图片绘制 &amp; Core Graphics</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#绘制结果"><span class="nav-number">3.0.7.</span> <span class="nav-text">绘制结果</span></a></li></ol></li></ol></li></ol></div>
+            
+
+          </div>
+        </section>
+      <!--/noindex-->
+      
+
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright">&copy; NULL &mdash; <span itemprop="copyrightYear">2017</span>
+  <span class="with-love">
+    <i class="fa fa-heartbeat"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">Homway</span>
+
+  
+</div>
+
+
+  <div class="powered-by">由 <a class="theme-link" target="_blank" href="https://hexo.io">Hexo</a> 强力驱动</div>
+
+
+
+  <span class="post-meta-divider">|</span>
+
+
+
+  <div class="theme-info">主题 &mdash; <a class="theme-link" target="_blank" href="https://github.com/iissnan/hexo-theme-next">NexT.Pisces</a> v5.1.3</div>
+
+
+
+
+        
+
+
+
+
+
+
+
+        
+      </div>
+    </footer>
+
+    
+      <div class="back-to-top">
+        <i class="fa fa-arrow-up"></i>
+        
+          <span id="scrollpercent"><span>0</span>%</span>
+        
+      </div>
+    
+
+    
+
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery/index.js?v=2.1.3"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/fastclick/lib/fastclick.min.js?v=1.0.6"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery_lazyload/jquery.lazyload.js?v=1.9.7"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/fancybox/source/jquery.fancybox.pack.js?v=2.1.5"></script>
+  
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/utils.js?v=5.1.3"></script>
+
+  <script type="text/javascript" src="/js/src/motion.js?v=5.1.3"></script>
+
+
+
+  
+  
+
+
+  <script type="text/javascript" src="/js/src/affix.js?v=5.1.3"></script>
+
+  <script type="text/javascript" src="/js/src/schemes/pisces.js?v=5.1.3"></script>
+
+
+
+  
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=5.1.3"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=5.1.3"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/bootstrap.js?v=5.1.3"></script>
+
+
+
+  
+
+
+  
+
+
+
+
+	
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+  
+  <script src="https://cdn1.lncld.net/static/js/av-core-mini-0.6.4.js"></script>
+  <script>AV.initialize("OstU3HPmKQuFwIe0wqN6SGHA-gzGzoHsz", "BvJDpS1SVjz3SveGROz2vLWR");</script>
+  <script>
+    function showTime(Counter) {
+      var query = new AV.Query(Counter);
+      var entries = [];
+      var $visitors = $(".leancloud_visitors");
+
+      $visitors.each(function () {
+        entries.push( $(this).attr("id").trim() );
+      });
+
+      query.containedIn('url', entries);
+      query.find()
+        .done(function (results) {
+          var COUNT_CONTAINER_REF = '.leancloud-visitors-count';
+
+          if (results.length === 0) {
+            $visitors.find(COUNT_CONTAINER_REF).text(0);
+            return;
+          }
+
+          for (var i = 0; i < results.length; i++) {
+            var item = results[i];
+            var url = item.get('url');
+            var time = item.get('time');
+            var element = document.getElementById(url);
+
+            $(element).find(COUNT_CONTAINER_REF).text(time);
+          }
+          for(var i = 0; i < entries.length; i++) {
+            var url = entries[i];
+            var element = document.getElementById(url);
+            var countSpan = $(element).find(COUNT_CONTAINER_REF);
+            if( countSpan.text() == '') {
+              countSpan.text(0);
+            }
+          }
+        })
+        .fail(function (object, error) {
+          console.log("Error: " + error.code + " " + error.message);
+        });
+    }
+
+    function addCount(Counter) {
+      var $visitors = $(".leancloud_visitors");
+      var url = $visitors.attr('id').trim();
+      var title = $visitors.attr('data-flag-title').trim();
+      var query = new AV.Query(Counter);
+
+      query.equalTo("url", url);
+      query.find({
+        success: function(results) {
+          if (results.length > 0) {
+            var counter = results[0];
+            counter.fetchWhenSave(true);
+            counter.increment("time");
+            counter.save(null, {
+              success: function(counter) {
+                var $element = $(document.getElementById(url));
+                $element.find('.leancloud-visitors-count').text(counter.get('time'));
+              },
+              error: function(counter, error) {
+                console.log('Failed to save Visitor num, with error message: ' + error.message);
+              }
+            });
+          } else {
+            var newcounter = new Counter();
+            /* Set ACL */
+            var acl = new AV.ACL();
+            acl.setPublicReadAccess(true);
+            acl.setPublicWriteAccess(true);
+            newcounter.setACL(acl);
+            /* End Set ACL */
+            newcounter.set("title", title);
+            newcounter.set("url", url);
+            newcounter.set("time", 1);
+            newcounter.save(null, {
+              success: function(newcounter) {
+                var $element = $(document.getElementById(url));
+                $element.find('.leancloud-visitors-count').text(newcounter.get('time'));
+              },
+              error: function(newcounter, error) {
+                console.log('Failed to create');
+              }
+            });
+          }
+        },
+        error: function(error) {
+          console.log('Error:' + error.code + " " + error.message);
+        }
+      });
+    }
+
+    $(function() {
+      var Counter = AV.Object.extend("Counter");
+      if ($('.leancloud_visitors').length == 1) {
+        addCount(Counter);
+      } else if ($('.post-title-link').length > 1) {
+        showTime(Counter);
+      }
+    });
+  </script>
+
+
+
+  
+
+  
+
+  
+  
+
+  
+
+  
+
+  
+
+</body>
+</html>
